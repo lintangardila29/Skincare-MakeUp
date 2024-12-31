@@ -1,0 +1,106 @@
+"use client";
+import { ColumnDef } from "@tanstack/react-table";
+import { CellAction } from "./cell-action";
+import { Checkbox } from "@/Components/ui/checkbox";
+import { Product } from "@/types/model";
+import { DataTableColumnHeader } from "@/Components/data-table/data-table-column-header";
+import { formatDate, formatRupiah } from "@/Lib/utils";
+import { Link } from "@inertiajs/react";
+import { Button } from "@/Components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/Components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
+import { getImageSrc } from "@/Lib/getImageSrc";
+
+export const columns: ColumnDef<Product>[] = [
+    {
+        id: "select",
+        header: ({ table }) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected()}
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
+        id: "actions_start",
+        cell: ({ row }) => <CellAction data={row.original} />,
+    },
+    {
+        accessorKey: "image",
+        header: ({ column }) => (
+            <Button variant="ghost" size="sm">Gambar</Button>
+        ),
+        cell: ({ row }) => (
+            <Dialog>
+                <DialogTrigger className="w-full place-items-center">
+                    <Avatar className="flex h-12 w-12 items-center justify-center space-y-0 border">
+                        <AvatarImage src={getImageSrc(row.original.image)} alt={row.original.name} />
+                        <AvatarFallback>{row.original.name?.[0]}</AvatarFallback>
+                    </Avatar>
+                </DialogTrigger>
+                <DialogContent className="bg-none bg-transparent border-0 shadow-none">
+                    <img src={getImageSrc(row.original.image)} alt={row.original.name} className="w-full h-auto place-self-center" />
+                </DialogContent>
+            </Dialog>
+        ),
+    },
+    {
+        accessorKey: "name",
+        header: ({ column }) => (
+            <DataTableColumnHeader className="min-w-56" column={column} title="Nama" />
+        ),
+    },
+    {
+        accessorKey: "description",
+        header: ({ column }) => (
+            <DataTableColumnHeader className="min-w-56" column={column} title="Deskripsi" />
+        ),
+    },
+    {
+        accessorKey: "price",
+        header: ({ column }) => (
+            <DataTableColumnHeader className="min-w-36 max-w-max" column={column} title="Harga" />
+        ),
+        cell: ({ row }) => (
+            <span>{formatRupiah(row.original.price)}</span>
+        ),
+    },
+    {
+        accessorKey: "brand.name",
+        header: ({ column }) => (
+            <DataTableColumnHeader className="min-w-36 max-w-max" column={column} title="Brand" />
+        ),
+    },
+    {
+        accessorKey: "category.name",
+        header: ({ column }) => (
+            <DataTableColumnHeader className="min-w-36 max-w-max" column={column} title="Kategori" />
+        ),
+    },
+    {
+        accessorKey: "created_at",
+        header: ({ column }) => (
+            <DataTableColumnHeader className="min-w-36 max-w-max" column={column} title="Tanggal Dibuat" />
+        ),
+        cell: ({ row }) => (
+            <span>{formatDate(new Date(row.original.created_at))}</span>
+        ),
+        filterFn: (row, id, value) => {
+            return value.includes(formatDate(row.getValue(id)))
+        },
+    },
+    {
+        id: "actions_end",
+        cell: ({ row }) => <CellAction data={row.original} />,
+    },
+];
